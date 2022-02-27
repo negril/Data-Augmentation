@@ -188,9 +188,9 @@ def clean_RWHAR(filepath, sel_location = None):
     print(dataset['activity'].value_counts())
     return dataset
 
- def get_angles(pos, i, d_model):
-  angle_rates = 1 / np.power(10000, (2 * (i//2)) / np.float32(d_model))
-  return pos * angle_rates
+def get_angles(pos, i, d_model):
+    angle_rates = 1 / np.power(10000, (2 * (i//2)) / np.float32(d_model))
+    return pos * angle_rates
 
 def generate_pe(channel, length, period = 100, channel_cosine = True):
     # This function generates a positional embedding needed for transformer to gain awareness of position of input
@@ -199,7 +199,7 @@ def generate_pe(channel, length, period = 100, channel_cosine = True):
     # The batch dimension will be broadcasted automatically.
     
     if not channel_cosine: # pe is an alternating sin and cos function of length across channel
-      angle_rads = get_angles(np.arange(length)[:, np.newaxis],
+        angle_rads = get_angles(np.arange(length)[:, np.newaxis],
                               np.arange(channel)[np.newaxis, :],
                               channel)
 
