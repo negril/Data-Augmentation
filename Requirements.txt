@@ -1,4 +1,4 @@
-Needs:
-torch
-pytorch-lightning
-numpy
+torch==1.7.1
+pytorch-lightning==1.2.1
+tensorboard==2.2
+pandas==1.2.5
