@@ -10,7 +10,7 @@ from EncodeLayer import EncodeLayer
 class Discriminator(nn.Module):
     
     def __init__(self, input_size = (27,100), nheads = 3, period = 50, dim_feedforward = 2048, num_layers = 1):
-        super(Discriminator,self).__init__()
+        super().__init__()
         self.input_size = input_size
         self.flat_input_size = np.prod(input_size)
         

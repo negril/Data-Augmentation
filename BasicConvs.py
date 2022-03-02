@@ -7,7 +7,7 @@ import torch.nn as nn
 class BasicConv1d(nn.Module):
 
     def __init__(self, in_planes, out_planes, kernel_size, stride = 1, padding = 0, bias = False, norm_layer = 1):
-        super(BasicConv1d, self).__init__() 
+        super().__init__()
             
         self.conv = nn.Conv1d(in_planes, out_planes, kernel_size, stride = stride, padding = padding, bias = bias)
         if norm_layer == 1:
@@ -41,7 +41,7 @@ def make_list(val):
 class BasicConv2d(nn.Module):
 
     def __init__(self, in_planes, out_planes, kernel_size, stride = 1, padding = 0):
-        super(BasicConv2d, self).__init__()
+        super().__init__()
         
         side_pad, top_pad = make_list(padding)
         side_ker, top_ker = make_list(kernel_size)

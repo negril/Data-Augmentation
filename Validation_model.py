@@ -10,7 +10,7 @@ import torch.nn as nn
 
 class Net(pl.LightningModule):
     def __init__(self, model, num_classes, classes_weight = None, lr = 0.0001, monitor = "val_f1_score"):
-        super(Net,self).__init__()
+        super().__init__()
         self.model = model
         self.lr = lr
         self.monitor = monitor

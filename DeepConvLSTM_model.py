@@ -8,7 +8,7 @@ from BasicConvs import BasicConv2d
 class DeepConvNet(nn.Module):
     
     def __init__(self, in_channels = 3, input_size = 100, hidden_size = 128, output_size = 7, conv_filter = (5,9), conv_padding = (2,4)):
-        super(DeepConvNet,self).__init__()
+        super().__init__()
         self.in_channels = in_channels
         self.input_size = input_size
         ## Input : 3 * 9 * 100 for PAMAP2

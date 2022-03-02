@@ -12,7 +12,7 @@ from io import BytesIO
 class TimeSeriesDataset(torch.utils.data.Dataset):
     # Reads a list of tuple of timeseries data and target data into a Pytorch dataloader compatible format
     def __init__(self, List):
-        super(TimeSeriesDataset,self).__init__()
+        super().__init__()
         self.data = List
         
     def __len__(self):

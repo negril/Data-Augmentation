@@ -9,7 +9,7 @@ import helper
 class Discriminator(nn.Module):
     
     def __init__(self, hidden_size = 256, input_size = (27,100), num_layers = 2, bidirectional = False):
-        super(Discriminator,self).__init__()
+        super().__init__()
         self.input_size = input_size
         norm_layer = 0 # # 0: no batchnorm 1: add batchnorm after conv
         ## Input : 27 * 100 for PAMAP2

@@ -7,7 +7,7 @@ import torch.nn as nn
 
 class F1_score_check(EarlyStopping):
     def __init__(self, monitor = "val_f1_score", threshold_value = 0.95):
-        super(F1_score_check, self).__init__(monitor = monitor, mode = "max", patience = 0)
+        super().__init__(monitor = monitor, mode = "max", patience = 0)
         self.threshold_value = threshold_value
         
     def _run_early_stopping_check(self, trainer, pl_module):

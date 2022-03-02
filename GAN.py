@@ -26,7 +26,7 @@ class GAN(pl.LightningModule):
     
     def __init__(self, val_model, generator, discriminator, noise_len, val_expected_output, num_classes, 
                  init_weight = True, decay = 1, dis_lr = 0.0002, gen_lr = 0.0002):
-        super(GAN, self).__init__()
+        super().__init__()
         self.dis_lr = dis_lr
         self.gen_lr = gen_lr
         self.decay = decay
