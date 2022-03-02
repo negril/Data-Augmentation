@@ -27,7 +27,7 @@ DEFAULT_RWHAR_FILEPATH = ["./data/RWHAR/"]
 
 DEFAULT_PAMAP2_FILEPATHS = ["./data/PAMAP2/subject101.dat","./data/PAMAP2/subject102.dat","./data/PAMAP2/subject103.dat","./data/PAMAP2/subject104.dat","./data/PAMAP2/subject105.dat","./data/PAMAP2/subject106.dat","./data/PAMAP2/subject107.dat","./data/PAMAP2/subject108.dat","./data/PAMAP2/subject109.dat"]
 
-GPUS = 0
+GPUS = -1
 
 def clean_all_files(filepaths, clean_func, **kwargs): 
     # filespaths is a list of text files with panda tables stored in them.
@@ -324,8 +324,7 @@ def train_LSTM_GAN(
                     gen_lr = gen_lr,
                    )
 
-        trainer = pl.Trainer(#gpus=GPUS,
-                             num_processes = 16,
+        trainer = pl.Trainer(gpus=GPUS,
                              max_epochs=max_epochs,
                              callbacks = [F1_score_check(monitor, threshold_value), 
                                           ModelCheckpoint(monitor = monitor, filename = '{epoch}-{val_loss:.3f}-{'+monitor+':.3f}', mode = 'max', save_weights_only = True),
@@ -393,8 +392,7 @@ def train_transformer_GAN(
                         gen_lr = gen_lr,
                        )
 
-            trainer = pl.Trainer(#gpus=GPUS,
-                                 num_processes = 16,
+            trainer = pl.Trainer(gpus=GPUS,
                                  max_epochs=max_epochs,
                                  callbacks = [F1_score_check(monitor, threshold_value = threshold_value), 
                                               ModelCheckpoint(monitor = monitor, filename = '{epoch}-{val_loss:.3f}-{'+monitor+':.3f}', mode = 'max', save_weights_only = True),
@@ -440,8 +438,7 @@ def train_LSTM_validation_model(
     net = DeepConvNet(in_channels = data_size[0], input_size = data_size[-1], hidden_size = hidden_size, output_size = total_activities, conv_filter = conv_filter, conv_padding = conv_padding)
     model = Net(model = net, num_classes = total_activities, classes_weight = torch.tensor(train_weight, dtype = torch.float), lr = lr)
 
-    trainer = pl.Trainer(#gpus=GPUS,
-                         num_processes = 16,
+    trainer = pl.Trainer(gpus=GPUS,
                          max_epochs=max_epochs,
                          log_every_n_steps = 200,
                          callbacks = [EarlyStopping(monitor = monitor, patience = 5, mode = "max"),
@@ -477,8 +474,7 @@ def train_transformer_validation_model(
     net = TransformerClassifier(in_channels = data_size[0], d_model = data_size[-1], output_size = total_activities, nhead = nhead, dim_feedforward = dim_feedforward, dropout= dropout, num_layers = num_layer)
     model = Net(model = net, num_classes = total_activities, classes_weight = torch.tensor(weight, dtype = torch.float), lr = lr)
 
-    trainer = pl.Trainer(#gpus=GPUS,
-                         num_processes = 16,
+    trainer = pl.Trainer(gpus=GPUS,
                          max_epochs=max_epochs,
                          log_every_n_steps = 200,
                          callbacks = [EarlyStopping(monitor = monitor, patience = 5, mode = "max"),
