@@ -6,8 +6,7 @@ import torch.nn as nn
 import pytorch_lightning as pl
 import numpy as np
 import random
-# from pytorch_lightning.metrics.functional import f1
-from pytorch_lightning.metrics import F1
+from torchmetrics import F1Score
 
 # Set random seed for reproducibility
 # manualSeed = 3942 # 7595 # 6161 # 8037
@@ -37,7 +36,7 @@ class GAN(pl.LightningModule):
         self.val_model = val_model
         self.num_classes = num_classes
         self.val_expected_output = val_expected_output
-        self.f1 = F1(num_classes = num_classes)
+        self.f1 = F1Score(num_classes = num_classes)
         
         # init weights
         if init_weight:

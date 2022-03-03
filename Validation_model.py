@@ -3,8 +3,7 @@
 ##               in this work (both LSTM and transformer based networks)
 
 import pytorch_lightning as pl
-# from pytorch_lightning.metrics.functional import f1
-from pytorch_lightning.metrics import F1
+from torchmetrics import F1Score
 import torch
 import torch.nn as nn
 
@@ -16,8 +15,8 @@ class Net(pl.LightningModule):
         self.monitor = monitor
         self.num_classes = num_classes
         self.criterion = nn.CrossEntropyLoss(weight = classes_weight);
-        self.train_f1 = F1(num_classes = num_classes)
-        self.val_f1 = F1(num_classes = num_classes)
+        self.train_f1 = F1Score(num_classes = num_classes)
+        self.val_f1 = F1Score(num_classes = num_classes)
         
         self.save_hyperparameters()
         

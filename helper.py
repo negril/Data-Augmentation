@@ -27,7 +27,8 @@ DEFAULT_RWHAR_FILEPATH = ["./data/RWHAR/"]
 
 DEFAULT_PAMAP2_FILEPATHS = ["./data/PAMAP2/subject101.dat","./data/PAMAP2/subject102.dat","./data/PAMAP2/subject103.dat","./data/PAMAP2/subject104.dat","./data/PAMAP2/subject105.dat","./data/PAMAP2/subject106.dat","./data/PAMAP2/subject107.dat","./data/PAMAP2/subject108.dat","./data/PAMAP2/subject109.dat"]
 
-GPUS = 0
+DEVICES=-1
+ACCELERATOR="gpu"
 
 def clean_all_files(filepaths, clean_func, **kwargs): 
     # filespaths is a list of text files with panda tables stored in them.
@@ -37,7 +38,8 @@ def clean_all_files(filepaths, clean_func, **kwargs):
     
     for file in filepaths:
         table = clean_func(file, **kwargs) # table has cleaned dataset from one file
-        total = total.append(table,ignore_index = True) # joins all data into one dataframe
+        total = pd.concat([total, table])
+
     return total
 
 def load_table(filepaths = DEFAULT_PAMAP2_FILEPATHS, clean_func = dataset.clean_PAMAP2_dataset, save_file = "clean_PAMAP2.pkl", force_reload = False, **kwargs):
@@ -174,7 +176,7 @@ def split(dataset, val_pc):
     
     valnum = int(np.floor(val_pc * len(dataset)))
     trainnum = len(dataset) - valnum
-    
+
     return random_split(dataset, [trainnum, valnum])
 
 def dist(dataset, num_classes):
@@ -182,7 +184,7 @@ def dist(dataset, num_classes):
     # it helps to train faster and better for imbalanced datasets
     # dataset is expected to be a torch dataset. This will return a vector of weights of each class
     
-    weight = np.zeros((num_classes,1))
+    weight = np.zeros((num_classes))
     for data in dataset:
         try:
             weight[data["label"].item()] += 1
@@ -228,6 +230,7 @@ def get_dataloaders(data_func, batch_size, output_size, val_pc, **kwargs):
         train, val = split(dtset, val_pc = val_pc)
         train_weight = dist(train, output_size)
         val_weight = dist(val, output_size)
+    
         print("Train weights : \n",train_weight,"\nValidation weights : \n", val_weight) # debug purposes
         train_iter = torch.utils.data.DataLoader(train, batch_size = batch_size, shuffle = True, num_workers = 10, pin_memory = True)
         val_iter = torch.utils.data.DataLoader(val, batch_size = batch_size, num_workers = 10, pin_memory = True)
@@ -324,7 +327,7 @@ def train_LSTM_GAN(
                     gen_lr = gen_lr,
                    )
 
-        trainer = pl.Trainer(gpus=GPUS,
+        trainer = pl.Trainer(devices=DEVICES, accelerator=ACCELERATOR,
                              max_epochs=max_epochs,
                              callbacks = [F1_score_check(monitor, threshold_value), 
                                           ModelCheckpoint(monitor = monitor, filename = '{epoch}-{val_loss:.3f}-{'+monitor+':.3f}', mode = 'max', save_weights_only = True),
@@ -392,7 +395,7 @@ def train_transformer_GAN(
                         gen_lr = gen_lr,
                        )
 
-            trainer = pl.Trainer(gpus=GPUS,
+            trainer = pl.Trainer(devices=DEVICES, accelerator=ACCELERATOR,
                                  max_epochs=max_epochs,
                                  callbacks = [F1_score_check(monitor, threshold_value = threshold_value), 
                                               ModelCheckpoint(monitor = monitor, filename = '{epoch}-{val_loss:.3f}-{'+monitor+':.3f}', mode = 'max', save_weights_only = True),
@@ -438,14 +441,14 @@ def train_LSTM_validation_model(
     net = DeepConvNet(in_channels = data_size[0], input_size = data_size[-1], hidden_size = hidden_size, output_size = total_activities, conv_filter = conv_filter, conv_padding = conv_padding)
     model = Net(model = net, num_classes = total_activities, classes_weight = torch.tensor(train_weight, dtype = torch.float), lr = lr)
 
-    trainer = pl.Trainer(gpus=GPUS,
+    trainer = pl.Trainer(devices=DEVICES, accelerator=ACCELERATOR,
                          max_epochs=max_epochs,
                          log_every_n_steps = 200,
                          callbacks = [EarlyStopping(monitor = monitor, patience = 5, mode = "max"),
                                      ModelCheckpoint(monitor = monitor, filename = '{epoch}-{val_loss:.3f}-{'+monitor+':.3f}', mode = 'max', save_weights_only = True),
+                                     pl.callbacks.stochastic_weight_avg.StochasticWeightAveraging()
                                      ],
                          logger = TensorBoardLogger(save_dir = tensorboard_save_dir, name = tensorboard_name_prefix),
-                         stochastic_weight_avg=True
                          )
     trainer.fit(model, train_iter, val_iter)
     
@@ -474,13 +477,13 @@ def train_transformer_validation_model(
     net = TransformerClassifier(in_channels = data_size[0], d_model = data_size[-1], output_size = total_activities, nhead = nhead, dim_feedforward = dim_feedforward, dropout= dropout, num_layers = num_layer)
     model = Net(model = net, num_classes = total_activities, classes_weight = torch.tensor(weight, dtype = torch.float), lr = lr)
 
-    trainer = pl.Trainer(gpus=GPUS,
+    trainer = pl.Trainer(devices=DEVICES, accelerator=ACCELERATOR,
                          max_epochs=max_epochs,
                          log_every_n_steps = 200,
                          callbacks = [EarlyStopping(monitor = monitor, patience = 5, mode = "max"),
                                      ModelCheckpoint(monitor = monitor, filename = '{epoch}-{val_loss:.3f}-{'+monitor+':.3f}', mode = 'max', save_weights_only = True),
+                                      pl.callbacks.stochastic_weight_avg.StochasticWeightAveraging()
                                      ],
                          logger = TensorBoardLogger(save_dir = tensorboard_save_dir, name = tensorboard_name_prefix),
-                         stochastic_weight_avg=True
                          )
     trainer.fit(model, train_iter, val_iter)
