@@ -9,7 +9,7 @@ import torch.nn as nn
 
 class Net(pl.LightningModule):
     def __init__(self, model, num_classes, classes_weight = None, lr = 0.0001, monitor = "val_f1_score"):
-        super(Net,self).__init__()
+        super().__init__()
         self.model = model
         self.lr = lr
         self.monitor = monitor
@@ -25,12 +25,14 @@ class Net(pl.LightningModule):
     
     def configure_optimizers(self):
         optimizer = torch.optim.Adamax(self.parameters(), lr=self.lr)
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, "max", patience = 3, verbose = True)
         return {
-            "optimizer":optimizer,
-            "scheduler":scheduler,
-            "monitor":self.monitor,
-               }
+            "optimizer": optimizer,
+            "lr_scheduler": {
+                "scheduler": torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, "max", patience = 3, verbose = True),
+                "monitor":   self.monitor,
+                # "frequency": 5,
+            },
+        }
     
     def training_step(self, batch, batch_idx):
         y_pred = self(batch["data"])

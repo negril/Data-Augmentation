@@ -25,10 +25,21 @@ from Validation_model import Net
 
 DEFAULT_RWHAR_FILEPATH = ["./data/RWHAR/"]
 
-DEFAULT_PAMAP2_FILEPATHS = ["./data/PAMAP2/subject101.dat","./data/PAMAP2/subject102.dat","./data/PAMAP2/subject103.dat","./data/PAMAP2/subject104.dat","./data/PAMAP2/subject105.dat","./data/PAMAP2/subject106.dat","./data/PAMAP2/subject107.dat","./data/PAMAP2/subject108.dat","./data/PAMAP2/subject109.dat"]
+DEFAULT_PAMAP2_FILEPATHS = [
+    "./data/PAMAP2_Dataset/Protocol/subject101.dat",
+    "./data/PAMAP2_Dataset/Protocol/subject102.dat",
+    "./data/PAMAP2_Dataset/Protocol/subject103.dat",
+    "./data/PAMAP2_Dataset/Protocol/subject104.dat",
+    "./data/PAMAP2_Dataset/Protocol/subject105.dat",
+    "./data/PAMAP2_Dataset/Protocol/subject106.dat",
+    "./data/PAMAP2_Dataset/Protocol/subject107.dat",
+    "./data/PAMAP2_Dataset/Protocol/subject108.dat",
+    "./data/PAMAP2_Dataset/Protocol/subject109.dat",
+]
 
 DEVICES=-1
 ACCELERATOR="gpu"
+
 
 def clean_all_files(filepaths, clean_func, **kwargs): 
     # filespaths is a list of text files with panda tables stored in them.
@@ -41,6 +52,7 @@ def clean_all_files(filepaths, clean_func, **kwargs):
         total = pd.concat([total, table])
 
     return total
+
 
 def load_table(filepaths = DEFAULT_PAMAP2_FILEPATHS, clean_func = dataset.clean_PAMAP2_dataset, save_file = "clean_PAMAP2.pkl", force_reload = False, **kwargs):
     # function to load a panda table from filepaths, clean each table using given clean_func, append them into one table and return it.
@@ -57,6 +69,7 @@ def load_table(filepaths = DEFAULT_PAMAP2_FILEPATHS, clean_func = dataset.clean_
         
     return table
 
+
 def load_PAMAP2(force_reload = False):
     # helper function for one line loading with optimizations 
     
@@ -66,6 +79,7 @@ def load_PAMAP2(force_reload = False):
     data = windowing(table)
     print("Done!")
     return data
+
 
 def load_PAMAP2_activity(activity_num = 0, force_reload = False):
     # helper function to load only one activty from PAMAP2 table
@@ -80,6 +94,7 @@ def load_PAMAP2_activity(activity_num = 0, force_reload = False):
     data = windowing(table)
     print("Done!")
     return data
+
 
 def load_RWHAR(sel_location = "chest", force_reload = False):
     # helper function for one line loading with optimizations 
@@ -101,6 +116,7 @@ def load_RWHAR(sel_location = "chest", force_reload = False):
         data.extend(tmp)
     print("Done!")
     return data
+
 
 def load_RWHAR_activity(activity_num = 0, sel_location = "chest", force_reload = False):
         # helper function for one line loading of one axctivity of RWHAR dataset 
@@ -127,6 +143,7 @@ def load_RWHAR_activity(activity_num = 0, sel_location = "chest", force_reload =
     print("Done!")
     return data
 
+
 def get_activityfunc(datasetname):
     # One line function to get the function and number of activities for PAMAP2 and RWHAR only (used in graphing)
     
@@ -141,6 +158,7 @@ def get_activityfunc(datasetname):
         return
     
     return activityfunc, total_activity
+
 
 def windowing(df, time_window = 1, sampling_freq = 100, group_col_num = 1, data_columns = range(2,29)):
     # df is the cleaned dataframe from dataset. This function will break the different activities to "window"
@@ -171,6 +189,7 @@ def windowing(df, time_window = 1, sampling_freq = 100, group_col_num = 1, data_
         
     return data
 
+
 def split(dataset, val_pc):
     # dataset is the dataset to be split. val_pc is the percentage in float split given to val dataset.
     
@@ -178,6 +197,7 @@ def split(dataset, val_pc):
     trainnum = len(dataset) - valnum
 
     return random_split(dataset, [trainnum, valnum])
+
 
 def dist(dataset, num_classes):
     # function is used to get a weight distribution of each label of a classified dataset to pass to Cross entropy loss object. 
@@ -195,6 +215,7 @@ def dist(dataset, num_classes):
     weight /= len(dataset)
     return weight
 
+
 def remove_prefix_from_dict(prefix, dicti):
     # pytorch lightning saves models with each models variable name. However we need only the state dict for
     # restoring a saved model so we need to strip the prefixed name from each dictionary key.
@@ -209,10 +230,12 @@ def remove_prefix_from_dict(prefix, dicti):
             
     return dicti
 
+
 def conv1d_ele_size(input_size, kernel, padding, stride, dilation):
     # Convinience function to get the output size of a 1d convolution 
     
     return int((input_size + (2*padding) - dilation*(kernel - 1) - 1)/stride + 1)
+
 
 def get_dataloaders(data_func, batch_size, output_size, val_pc, **kwargs):
     # Function to get the data from data function and load it to a train and validation dataloaders and the weight of the training dataset.
@@ -243,7 +266,8 @@ def get_dataloaders(data_func, batch_size, output_size, val_pc, **kwargs):
         val_iter = torch.utils.data.DataLoader(val, batch_size = batch_size, num_workers = 10, pin_memory = True)
         
         return train_iter, val_iter
-    
+
+
 def load_pl_model(ckpt_path, class_name, remove_prefix ="model.", strict_loading = False,  **kwargs):
     # Validation model has to be extracted from pytorch lightning modules so this is a one line loading
     # remove_prefix can be set to None if you dont want any prefix to be removed from ckpt file
@@ -259,6 +283,7 @@ def load_pl_model(ckpt_path, class_name, remove_prefix ="model.", strict_loading
     val_model.load_state_dict(state_dict, strict = strict_loading)
     val_model.eval()
     return val_model
+
 
 def load_tensorboard_models(datasetname, total_activity, path_tensorboard_folder):
     # load models for each activity in a tensorboard save directory
@@ -280,7 +305,8 @@ def load_tensorboard_models(datasetname, total_activity, path_tensorboard_folder
         model = GAN.load_from_checkpoint(path+ckpt)
         model.eval()
         yield model, activity_num
-        
+
+
 def train_LSTM_GAN(
                 data_func,
                 val_model,
@@ -335,7 +361,7 @@ def train_LSTM_GAN(
                              logger = TensorBoardLogger(save_dir = tensorboard_save_dir, name = tensorboard_name_prefix + str(chosen_activity)),
                              check_val_every_n_epoch = 5,
                              )
-        trainer.fit(model, train_iter, val_iter)
+        trainer.fit(model, train_dataloaders=train_iter, val_dataloaders=val_iter)
         
         # verify if the model is trained
         if trainer.callback_metrics[monitor] >= threshold_value:
@@ -345,7 +371,8 @@ def train_LSTM_GAN(
             success[chosen_activity] = None
 
     print(success)
-    
+
+
 def train_transformer_GAN(
                     data_func,
                     val_model,
@@ -382,7 +409,7 @@ def train_transformer_GAN(
         dim_feedforward = init_dim_feedforward
         train_iter, val_iter = get_dataloaders(data_func, batch_size = batch_size, output_size = total_activities, val_pc = val_iter_size, activity_num = chosen_activity)
 
-        while (try_num < max_retries):
+        while try_num < max_retries:
             print("Activity ", chosen_activity,", Try ",try_num)
             model = GAN(val_model = val_model, 
                         generator = Generator_transformer.Generator(noise_len = noise_len, output_size = data_size, nheads = gen_nheads, period = period, dim_feedforward = dim_feedforward, num_layers = gen_num_layers),
@@ -403,20 +430,21 @@ def train_transformer_GAN(
                                  logger = TensorBoardLogger(save_dir = tensorboard_save_dir, name = tensorboard_name_prefix + str(chosen_activity)),
                                  check_val_every_n_epoch = 5,
                                  )
-            result = trainer.fit(model, train_iter, val_iter)
+            trainer.fit(model, train_dataloaders=train_iter, val_dataloaders=val_iter)
             # verify if the model is trained
-            if trainer.callback_metrics[monitor] >= threshold_value or result != 1:
+            if trainer.callback_metrics[monitor] >= threshold_value:
                 print("Success!")
                 success[chosen_activity] = trainer.logger.version
                 break
-            else: # model not trained
+            else:  # model not trained
                 dim_feedforward *= dim_feedforward_exponent
                 try_num += 1
                 if try_num == max_retries:
                     success[chosen_activity] = None
 
     print(success)
-    
+
+
 def train_LSTM_validation_model(
                 data_func,
                 total_activities = 7,
@@ -436,7 +464,6 @@ def train_LSTM_validation_model(
     
     train_iter, val_iter,train_weight = get_dataloaders(data_func, batch_size = batch_size, output_size = total_activities, val_pc = val_pc, **kwargs)
     weight = (1 - train_weight)/np.sum(1 - train_weight)
-    
         
     net = DeepConvNet(in_channels = data_size[0], input_size = data_size[-1], hidden_size = hidden_size, output_size = total_activities, conv_filter = conv_filter, conv_padding = conv_padding)
     model = Net(model = net, num_classes = total_activities, classes_weight = torch.tensor(train_weight, dtype = torch.float), lr = lr)
@@ -450,8 +477,9 @@ def train_LSTM_validation_model(
                                      ],
                          logger = TensorBoardLogger(save_dir = tensorboard_save_dir, name = tensorboard_name_prefix),
                          )
-    trainer.fit(model, train_iter, val_iter)
-    
+    trainer.fit(model, train_dataloaders=train_iter, val_dataloaders=val_iter)
+
+
 def train_transformer_validation_model(
                 data_func,
                 total_activities = 7,
@@ -472,8 +500,7 @@ def train_transformer_validation_model(
     
     train_iter, val_iter,train_weight = get_dataloaders(data_func, batch_size = batch_size, output_size = total_activities, val_pc = val_pc, **kwargs)
     weight = (1 - train_weight)/np.sum(1 - train_weight)
-        
-        
+
     net = TransformerClassifier(in_channels = data_size[0], d_model = data_size[-1], output_size = total_activities, nhead = nhead, dim_feedforward = dim_feedforward, dropout= dropout, num_layers = num_layer)
     model = Net(model = net, num_classes = total_activities, classes_weight = torch.tensor(weight, dtype = torch.float), lr = lr)
 
@@ -486,4 +513,4 @@ def train_transformer_validation_model(
                                      ],
                          logger = TensorBoardLogger(save_dir = tensorboard_save_dir, name = tensorboard_name_prefix),
                          )
-    trainer.fit(model, train_iter, val_iter)
+    trainer.fit(model, train_dataloaders=train_iter, val_dataloaders=val_iter)
