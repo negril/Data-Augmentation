@@ -144,7 +144,8 @@ def RWHAR_load_table_activity(path_acc, path_gyr):
         
         acc_tab["location"] = loc
         
-        data = data.append(acc_tab)
+        data = pd.concat([data, acc_tab])
+
     
     return data
 
@@ -168,15 +169,15 @@ def clean_RWHAR(filepath, sel_location = None):
         for activity in RWHAR_ACTIVITY_NUM.keys(): # pair the acc and gyr zips of the same activity
             activity_name = "_"+activity+"_csv.zip"
             
-            path_acc = filepath+sub+"/acc"+activity_name # concat the path to acc file for given activity and subject
-            path_gyr = filepath+sub+"/gyr"+activity_name # concat the path to gyr file for given activity and subject
+            path_acc = filepath+sub+"/data/acc"+activity_name # concat the path to acc file for given activity and subject
+            path_gyr = filepath+sub+"/data/gyr"+activity_name # concat the path to gyr file for given activity and subject
 
             table = RWHAR_load_table_activity(path_acc,path_gyr)
             table["activity"] = RWHAR_ACTIVITY_NUM[activity] # add a activity column and fill it with activity num
-            sub_pd = sub_pd.append(table)
+            sub_pd = pd.concat([sub_pd, table])
             
         sub_pd["subject"] = subject_num # add subject id to all entries
-        dataset = dataset.append(sub_pd)
+        dataset = pd.concat([dataset, sub_pd])
     
     if sel_location is not None:
         print("Selecting location : ",sel_location)

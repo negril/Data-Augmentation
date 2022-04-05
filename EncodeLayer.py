@@ -10,6 +10,7 @@ class EncodeLayer(nn.Module):
     
     def __init__(self, d_model, nhead, dim_feedforward=2048, dropout=0.1):
         super(EncodeLayer, self).__init__()
+        
         self.d_model = d_model
         self.dim_feedforward = dim_feedforward
         self.p = nn.Conv1d(self.d_model, self.d_model, 1)

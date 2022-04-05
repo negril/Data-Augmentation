@@ -39,6 +39,8 @@ DEFAULT_PAMAP2_FILEPATHS = [
 
 DEVICES=-1
 ACCELERATOR="gpu"
+WORKERS=4
+PIN_MEMORY=True
 
 
 def clean_all_files(filepaths, clean_func, **kwargs): 
@@ -255,15 +257,15 @@ def get_dataloaders(data_func, batch_size, output_size, val_pc, **kwargs):
         val_weight = dist(val, output_size)
     
         print("Train weights : \n",train_weight,"\nValidation weights : \n", val_weight) # debug purposes
-        train_iter = torch.utils.data.DataLoader(train, batch_size = batch_size, shuffle = True, num_workers = 10, pin_memory = True)
-        val_iter = torch.utils.data.DataLoader(val, batch_size = batch_size, num_workers = 10, pin_memory = True)
+        train_iter = torch.utils.data.DataLoader(train, batch_size = batch_size, shuffle = True, num_workers = WORKERS, pin_memory = PIN_MEMORY)
+        val_iter = torch.utils.data.DataLoader(val, batch_size = batch_size, num_workers = WORKERS, pin_memory = PIN_MEMORY)
         
         return train_iter, val_iter, train_weight
     else:
         # spoof validation dataset
-        train_iter = torch.utils.data.DataLoader(dtset, batch_size = batch_size, shuffle = True, num_workers = 10, pin_memory = True)
+        train_iter = torch.utils.data.DataLoader(dtset, batch_size = batch_size, shuffle = True, num_workers = WORKERS, pin_memory = PIN_MEMORY)
         val = torch.ones((batch_size * val_pc, 1))
-        val_iter = torch.utils.data.DataLoader(val, batch_size = batch_size, num_workers = 10, pin_memory = True)
+        val_iter = torch.utils.data.DataLoader(val, batch_size = batch_size, num_workers = WORKERS, pin_memory = PIN_MEMORY)
         
         return train_iter, val_iter
 
@@ -498,7 +500,7 @@ def train_transformer_validation_model(
     # One line training using pytorch lightning abstraction framework
     # data_func is a function which takes in activity_num and gives the data of only those data
     
-    train_iter, val_iter,train_weight = get_dataloaders(data_func, batch_size = batch_size, output_size = total_activities, val_pc = val_pc, **kwargs)
+    train_iter, val_iter, train_weight = get_dataloaders(data_func, batch_size = batch_size, output_size = total_activities, val_pc = val_pc, **kwargs)
     weight = (1 - train_weight)/np.sum(1 - train_weight)
 
     net = TransformerClassifier(in_channels = data_size[0], d_model = data_size[-1], output_size = total_activities, nhead = nhead, dim_feedforward = dim_feedforward, dropout= dropout, num_layers = num_layer)

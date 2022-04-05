@@ -9,7 +9,7 @@ import torch.nn as nn
 
 class Net(pl.LightningModule):
     def __init__(self, model, num_classes, classes_weight = None, lr = 0.0001, monitor = "val_f1_score"):
-        super().__init__()
+        super(Net, self).__init__()
         self.model = model
         self.lr = lr
         self.monitor = monitor
@@ -18,7 +18,7 @@ class Net(pl.LightningModule):
         self.train_f1 = F1Score(num_classes = num_classes)
         self.val_f1 = F1Score(num_classes = num_classes)
         
-        self.save_hyperparameters()
+        self.save_hyperparameters(ignore=['model'])
         
     def forward(self, input_seq):
         return self.model(input_seq)

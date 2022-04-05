@@ -46,7 +46,7 @@ class GAN(pl.LightningModule):
         for param in self.val_model.parameters():
             param.requires_grad = False
 
-        self.save_hyperparameters()
+        self.save_hyperparameters(ignore=['model','generator','discriminator','val_model'])
     
     def forward(self, x):
         if self.training :
@@ -130,7 +130,7 @@ class GAN(pl.LightningModule):
         _, index = torch.max(fake_outputs, dim = 1)
         V_G_x = torch.mean(index.to(torch.float)).item()
         self.log("V(G(x))", V_G_x, on_step = False, on_epoch = True, prog_bar = False, logger = True)
-        self.log("Accurate_count", torch.count_nonzero(index == self.val_expected_output), on_step = False, on_epoch = True, prog_bar = False, logger = True)
+        self.log("Accurate_count", torch.count_nonzero(index == self.val_expected_output)/batch.shape[0], on_step = False, on_epoch = True, prog_bar = False, logger = True) #TODO You called `self.log('Accurate_count', ...)` in your `validation_step` but the value needs to be floating point. Converting it to torch.float32.
         label = torch.full((batch.shape[0],), self.val_expected_output, dtype = torch.long, device = self.device)
         val_loss = nn.CrossEntropyLoss()(fake_outputs, label)
         self.log("val_loss", val_loss, on_step = False, on_epoch = True, prog_bar = False, logger = True)

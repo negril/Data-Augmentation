@@ -11,6 +11,7 @@ class Generator(nn.Module):
     
     def __init__(self, hidden_size = 256, noise_len = 100, output_size = (27,100), num_layers = 2, bidirectional = False):
         super(Generator,self).__init__()
+        
         self.output_size = output_size
         self.noise_len = noise_len
         flat_output_size = np.prod(output_size)

@@ -10,26 +10,27 @@ class F1_score_check(EarlyStopping):
         super(F1_score_check, self).__init__(monitor = monitor, mode = "max", patience = 0)
         self.threshold_value = threshold_value
         
-    def _run_early_stopping_check(self, trainer, pl_module):
-        logs = trainer.logger_connector.callback_metrics
+    def _run_early_stopping_check(self, trainer):
+        #logs = trainer.logger_connector.callback_metrics
+        logs = trainer.callback_metrics
 
         if not self._validate_condition_metric(logs):
             return  # short circuit if metric not present
 
         current = logs.get(self.monitor)
         # when in dev debugging
-        trainer.dev_debugger.track_early_stopping_history(self, current)
+        # trainer.dev_debugger.track_early_stopping_history(self, current)
         
-        if not isinstance(current, torch.Tensor):
-            current = torch.tensor(current, device=pl_module.device)
+        #if not isinstance(current, torch.Tensor):
+            #current = torch.tensor(current, device=pl_module.device)
 
-        if trainer.use_tpu and TPU_AVAILABLE:
-            current = current.cpu()
+        #if trainer.use_tpu and TPU_AVAILABLE:
+        #    current = current.cpu()
         
         should_stop = current >= self.threshold_value
         if bool(should_stop):
             self.stopped_epoch = trainer.current_epoch
             trainer.should_stop = True
             
-        should_stop = trainer.training_type_plugin.reduce_early_stopping_decision(should_stop)
+        should_stop = trainer.strategy.reduce_boolean_decision(should_stop)
         trainer.should_stop = should_stop
